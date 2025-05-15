@@ -1,10 +1,10 @@
-const fs = require('fs');
 const { Parser } = require('json2csv');
 const config = require('./config');
+const fs = require('fs');
 
-async function getCourseUserCount() {
-  let url = `${config.canvas.url}/courses/${config.canvas.course}/users?enrollment_type=student&per_page=100`;
-  let count = 0;
+async function loadUsers() {
+  let url = `${config.canvas.url}/courses/${config.canvas.course}/users?enrollment_type=student&enrollment_state[]=active&enrollment_state[]=inactive&include[]=enrollments&per_page=100`;
+  const users = {};
 
   while (url) {
     const response = await fetch(url, {
@@ -17,16 +17,23 @@ async function getCourseUserCount() {
       throw new Error(`HTTP ${response.status}: ${await response.text()}`);
     }
 
-    const users = await response.json();
-    count += users.length;
+    const data = await response.json();
+    data.forEach((e) => {
+      users[e.id] = {
+        id: e.id,
+        name: e.name,
+        email: e.email,
+        assignmentCount: 0,
+      };
+    });
 
     url = getNextUrl(response);
   }
 
-  return count;
+  return users;
 }
 
-async function fetchAssignmentsMap() {
+async function loadAssignments() {
   const url = `${config.canvas.url}/courses/${config.canvas.course}/assignments?per_page=100`;
 
   const response = await fetch(url, {
@@ -39,20 +46,29 @@ async function fetchAssignmentsMap() {
     throw new Error(`Failed to fetch assignments: ${await response.text()}`);
   }
 
-  const assignments = await response.json();
-  const map = {};
-  for (const assignment of assignments) {
-    map[assignment.id] = assignment.name;
+  const data = await response.json();
+  const assignments = {};
+  for (const assignment of data) {
+    assignments[assignment.id] = {
+      id: assignment.id,
+      name: assignment.name,
+      studentCount: 0,
+      submissionCount: 0,
+      lateCount: 0,
+      possiblePoints: assignment.points_possible,
+      totalStudentPoints: 0,
+    };
   }
-  return map;
+  return assignments;
 }
 
-async function fetchGradebook() {
-  const userCount = await getCourseUserCount();
-  const assignmentMap = await fetchAssignmentsMap();
+async function processSubmissions() {
+  const users = await loadUsers();
+  const assignments = await loadAssignments();
 
   try {
-    let url = `${config.canvas.url}/courses/${config.canvas.course}/students/submissions?student_ids[]=all&per_page=10`;
+    // possible workflow_state:submitted, unsubmitted, graded, pending_review
+    let url = `${config.canvas.url}/courses/${config.canvas.course}/students/submissions?workflow_state=graded&student_ids[]=all&per_page=100`;
 
     while (url) {
       const response = await fetch(url, {
@@ -67,27 +83,42 @@ async function fetchGradebook() {
 
       const assignmentData = await response.json();
 
-      const assignments = assignmentData.map((e) => {
-        return {
-          id: e.assignment_id,
-          assignment: assignmentMap[e.assignment_id] || `${e.assignment_id}`,
-          user: e.user_id,
-          score: e.score,
-        };
-      });
+      assignmentData.forEach((e) => {
+        const user = users[e.user_id];
+        if (user) {
+          const done = e.missing ? 0 : 1;
+          user.assignmentCount += done;
 
-      const parser = new Parser();
-      const csv = parser.parse(assignments);
-      console.log(csv);
+          const assignment = assignments[e.assignment_id];
+          assignment.studentCount++;
+          assignment.submissionCount += done;
+          assignment.lateCount += e.late ? 1 : 0;
+          assignment.totalStudentPoints += e.score || 0;
+        }
+      });
 
       url = getNextUrl(response);
     }
 
-    // const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    // const filename = `gradebook-${timestamp}.csv`;
+    const results = Object.values(assignments).map((assignment) => {
+      const averageGrade = assignment.possiblePoints ? Math.round((assignment.totalStudentPoints / assignment.studentCount / assignment.possiblePoints) * 100) / 100 : 0;
+      const submissionPercent = Math.round((assignment.submissionCount / assignment.studentCount) * 100) / 100;
+      const latePercent = Math.round((assignment.lateCount / assignment.studentCount) * 100) / 100;
+      return {
+        assignment: assignment.name,
+        submissionPercent: submissionPercent,
+        latePercent: latePercent,
+        averageGrade: averageGrade,
+      };
+    });
 
-    // fs.writeFileSync(filename, csv);
-    // console.log(`Gradebook saved to ${filename}`);
+    const parser = new Parser();
+    const csv = parser.parse(results);
+
+    const filename = `gradebook-${config.canvas.course}.csv`;
+    const dateHeader = `Date: ${new Date().toLocaleString()}\n\n`;
+    fs.appendFileSync(filename, dateHeader + csv + '\n\n');
+    console.log(`Gradebook data appended to ${filename}`);
   } catch (error) {
     console.error('Error fetching gradebook:', error.message);
   }
@@ -101,9 +132,9 @@ function getNextUrl(response) {
   return match ? match[1] : null;
 }
 
-fetchGradebook();
+processSubmissions();
 
-// const period = 24 * 60 * 60 * 1000;
-// setInterval(() => {
-//   fetchGradebook();
-// }, period);
+const period = 24 * 60 * 60 * 1000;
+setInterval(() => {
+  processSubmissions();
+}, period);
