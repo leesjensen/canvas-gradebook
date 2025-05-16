@@ -5,7 +5,7 @@ const fs = require('fs');
 async function loadUsers() {
   const url = `${config.canvas.url}/courses/${config.canvas.course}/users?enrollment_type=student&enrollment_state[]=active&enrollment_state[]=inactive&include[]=enrollments&per_page=100`;
   const users = {};
-  callCanvas(url, (user) => {
+  await callCanvas(url, (user) => {
     users[user.id] = {
       id: user.id,
       name: user.name,
@@ -20,7 +20,7 @@ async function loadUsers() {
 async function loadAssignments() {
   const url = `${config.canvas.url}/courses/${config.canvas.course}/assignments?per_page=100`;
   const assignments = {};
-  callCanvas(url, (assignment) => {
+  await callCanvas(url, (assignment) => {
     assignments[assignment.id] = {
       id: assignment.id,
       name: assignment.name,
@@ -48,10 +48,12 @@ async function processSubmissions() {
         user.assignmentCount += done;
 
         const assignment = assignments[e.assignment_id];
-        assignment.studentCount++;
-        assignment.submissionCount += done;
-        assignment.lateCount += e.late ? 1 : 0;
-        assignment.totalStudentPoints += e.score || 0;
+        if (assignment) {
+          assignment.studentCount++;
+          assignment.submissionCount += done;
+          assignment.lateCount += e.late ? 1 : 0;
+          assignment.totalStudentPoints += e.score ?? 0;
+        }
       }
     });
 
@@ -62,12 +64,16 @@ async function processSubmissions() {
   }
 }
 
+function formatNum(condition, value) {
+  return condition ? parseFloat(value.toFixed(2)) : 0;
+}
+
 function collateResults(assignments) {
   const dateHeader = new Date().toLocaleString();
   return Object.values(assignments).map((assignment) => {
-    const averageGrade = assignment.possiblePoints && assignment.studentCount ? Math.round((assignment.totalStudentPoints / assignment.studentCount / assignment.possiblePoints) * 100) / 100 : 0;
-    const submissionPercent = assignment.studentCount ? Math.round((assignment.submissionCount / assignment.studentCount) * 100) / 100 : 0;
-    const latePercent = assignment.studentCount ? Math.round((assignment.lateCount / assignment.studentCount) * 100) / 100 : 0;
+    const averageGrade = formatNum(assignment.possiblePoints && assignment.studentCount, assignment.totalStudentPoints / assignment.studentCount / assignment.possiblePoints);
+    const submissionPercent = formatNum(assignment.studentCount, assignment.submissionCount / assignment.studentCount);
+    const latePercent = formatNum(assignment.studentCount, assignment.lateCount / assignment.studentCount);
     return {
       date: dateHeader,
       assignment: assignment.name,
@@ -99,9 +105,7 @@ async function callCanvas(url, processCallback) {
     }
 
     const data = await response.json();
-    data.forEach((e) => {
-      processCallback(e);
-    });
+    data.forEach(processCallback);
 
     url = getNextUrl(response);
   }
@@ -117,7 +121,7 @@ function getNextUrl(response) {
 
 processSubmissions();
 
-const period = 24 * 60 * 60 * 1000;
-setInterval(() => {
-  processSubmissions();
-}, period);
+// const period = 24 * 60 * 60 * 1000;
+// setInterval(() => {
+//   processSubmissions();
+// }, period);
