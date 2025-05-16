@@ -1,4 +1,4 @@
-const { Parser } = require('json2csv');
+const { AsyncParser } = require('@json2csv/node');
 const config = require('./config');
 const fs = require('fs');
 
@@ -67,7 +67,6 @@ async function processSubmissions() {
   const assignments = await loadAssignments();
 
   try {
-    // possible workflow_state:submitted, unsubmitted, graded, pending_review
     let url = `${config.canvas.url}/courses/${config.canvas.course}/students/submissions?workflow_state=graded&student_ids[]=all&per_page=100`;
 
     while (url) {
@@ -100,11 +99,14 @@ async function processSubmissions() {
       url = getNextUrl(response);
     }
 
+    const dateHeader = new Date().toLocaleString();
+
     const results = Object.values(assignments).map((assignment) => {
-      const averageGrade = assignment.possiblePoints ? Math.round((assignment.totalStudentPoints / assignment.studentCount / assignment.possiblePoints) * 100) / 100 : 0;
-      const submissionPercent = Math.round((assignment.submissionCount / assignment.studentCount) * 100) / 100;
-      const latePercent = Math.round((assignment.lateCount / assignment.studentCount) * 100) / 100;
+      const averageGrade = assignment.possiblePoints && assignment.studentCount ? Math.round((assignment.totalStudentPoints / assignment.studentCount / assignment.possiblePoints) * 100) / 100 : 0;
+      const submissionPercent = assignment.studentCount ? Math.round((assignment.submissionCount / assignment.studentCount) * 100) / 100 : 0;
+      const latePercent = assignment.studentCount ? Math.round((assignment.lateCount / assignment.studentCount) * 100) / 100 : 0;
       return {
+        date: dateHeader,
         assignment: assignment.name,
         submissionPercent: submissionPercent,
         latePercent: latePercent,
@@ -112,12 +114,11 @@ async function processSubmissions() {
       };
     });
 
-    const parser = new Parser();
-    const csv = parser.parse(results);
-
     const filename = `gradebook-${config.canvas.course}.csv`;
-    const dateHeader = `Date: ${new Date().toLocaleString()}\n\n`;
-    fs.appendFileSync(filename, dateHeader + csv + '\n\n');
+    const fileExists = fs.existsSync(filename);
+    const parser = new AsyncParser({ header: !fileExists }, {}, {});
+    const csv = await parser.parse(results).promise();
+    fs.appendFileSync(filename, csv + '\n', 'utf8');
     console.log(`Gradebook data appended to ${filename}`);
   } catch (error) {
     console.error('Error fetching gradebook:', error.message);
