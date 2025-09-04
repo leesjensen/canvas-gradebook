@@ -71,3 +71,9 @@ If you want to have the report run once a day then include the `repeat` paramete
 ```sh
 node main.js --repeat
 ```
+
+### Analyze
+
+Open the CSV in your favorite editor and enjoy.
+
+![alt text](spreadsheet.png)
