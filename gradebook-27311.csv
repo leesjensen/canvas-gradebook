@@ -1,103 +1,4 @@
 "date","assignment","submissionPercent","latePercent","averageGrade"
-"5/16/2025, 7:40:41 AM","Demo day submission",0.28,0.04,0
-"5/16/2025, 7:40:41 AM","Startup CSS",0.88,0.2,0.83
-"5/16/2025, 7:40:41 AM","Startup HTML",0.91,0.23,0.85
-"5/16/2025, 7:40:41 AM","Startup DB",0.76,0.39,0.69
-"5/16/2025, 7:40:41 AM","Startup React Phase 1: HTML/CSS",0.83,0.24,0.79
-"5/16/2025, 7:40:41 AM","Startup Service",0.81,0.42,0.73
-"5/16/2025, 7:40:41 AM","Startup WebSocket",0.69,0.25,0.61
-"5/16/2025, 7:40:41 AM","Startup specification",0.94,0.1,0.92
-"5/16/2025, 7:40:41 AM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
-"5/16/2025, 7:40:41 AM","Startup AWS",0.93,0.11,0.91
-"5/16/2025, 7:40:41 AM","Student Rating Submission",1,0,0
-"5/16/2025, 7:42:39 AM","Demo day submission",0.28,0.04,0
-"5/16/2025, 7:42:39 AM","Startup CSS",0.88,0.2,0.83
-"5/16/2025, 7:42:39 AM","Startup HTML",0.91,0.23,0.85
-"5/16/2025, 7:42:39 AM","Startup DB",0.76,0.39,0.69
-"5/16/2025, 7:42:39 AM","Startup React Phase 1: HTML/CSS",0.83,0.24,0.79
-"5/16/2025, 7:42:39 AM","Startup Service",0.81,0.42,0.73
-"5/16/2025, 7:42:39 AM","Startup WebSocket",0.69,0.25,0.61
-"5/16/2025, 7:42:39 AM","Startup specification",0.94,0.1,0.92
-"5/16/2025, 7:42:39 AM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
-"5/16/2025, 7:42:39 AM","Startup AWS",0.93,0.11,0.91
-"5/16/2025, 7:42:39 AM","Student Rating Submission",1,0,0
-"5/16/2025, 7:44:45 AM","Demo day submission",0.28,0.04,0
-"5/16/2025, 7:44:45 AM","Startup CSS",0.88,0.2,0.83
-"5/16/2025, 7:44:45 AM","Startup HTML",0.91,0.23,0.85
-"5/16/2025, 7:44:45 AM","Startup DB",0.76,0.39,0.69
-"5/16/2025, 7:44:45 AM","Startup React Phase 1: HTML/CSS",0.83,0.24,0.79
-"5/16/2025, 7:44:45 AM","Startup Service",0.81,0.42,0.73
-"5/16/2025, 7:44:45 AM","Startup WebSocket",0.69,0.25,0.61
-"5/16/2025, 7:44:45 AM","Startup specification",0.94,0.1,0.92
-"5/16/2025, 7:44:45 AM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
-"5/16/2025, 7:44:45 AM","Startup AWS",0.93,0.11,0.91
-"5/16/2025, 7:44:45 AM","Student Rating Submission",1,0,0
-"5/16/2025, 7:54:14 AM","Demo day submission",NaN,NaN,0
-"5/16/2025, 7:54:14 AM","Startup CSS",NaN,NaN,NaN
-"5/16/2025, 7:54:14 AM","Startup HTML",0.89,0.22,0.87
-"5/16/2025, 7:54:14 AM","Startup DB",NaN,NaN,NaN
-"5/16/2025, 7:54:14 AM","Startup React Phase 1: HTML/CSS",NaN,NaN,NaN
-"5/16/2025, 7:54:14 AM","Startup Service",NaN,NaN,NaN
-"5/16/2025, 7:54:14 AM","Startup WebSocket",NaN,NaN,NaN
-"5/16/2025, 7:54:14 AM","Startup specification",0.98,0.09,0.96
-"5/16/2025, 7:54:14 AM","Startup React Phase 2: Interactivity",NaN,NaN,NaN
-"5/16/2025, 7:54:14 AM","Startup AWS",NaN,NaN,NaN
-"5/16/2025, 7:54:14 AM","Student Rating Submission",NaN,NaN,0
-"5/16/2025, 7:56:32 AM","Demo day submission",0.28,0.04,0
-"5/16/2025, 7:56:32 AM","Startup CSS",0.88,0.2,0.83
-"5/16/2025, 7:56:32 AM","Startup HTML",0.91,0.23,0.85
-"5/16/2025, 7:56:32 AM","Startup DB",0.76,0.39,0.69
-"5/16/2025, 7:56:32 AM","Startup React Phase 1: HTML/CSS",0.83,0.24,0.79
-"5/16/2025, 7:56:32 AM","Startup Service",0.81,0.42,0.73
-"5/16/2025, 7:56:32 AM","Startup WebSocket",0.69,0.25,0.61
-"5/16/2025, 7:56:32 AM","Startup specification",0.94,0.1,0.92
-"5/16/2025, 7:56:32 AM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
-"5/16/2025, 7:56:32 AM","Startup AWS",0.93,0.11,0.91
-"5/16/2025, 7:56:32 AM","Student Rating Submission",1,0,0
-"5/16/2025, 8:12:26 AM","Demo day submission",0.28,0.04,0
-"5/16/2025, 8:12:26 AM","Startup CSS",0.87,0.2,0.82
-"5/16/2025, 8:12:26 AM","Startup HTML",0.91,0.22,0.85
-"5/16/2025, 8:12:26 AM","Startup DB",0.76,0.4,0.7
-"5/16/2025, 8:12:26 AM","Startup React Phase 1: HTML/CSS",0.82,0.23,0.78
-"5/16/2025, 8:12:26 AM","Startup Service",0.8,0.4,0.72
-"5/16/2025, 8:12:26 AM","Startup WebSocket",0.69,0.25,0.61
-"5/16/2025, 8:12:26 AM","Startup specification",0.92,0.11,0.89
-"5/16/2025, 8:12:26 AM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
-"5/16/2025, 8:12:26 AM","Startup AWS",0.93,0.11,0.91
-"5/16/2025, 8:12:26 AM","Student Rating Submission",1,0,0
-"5/16/2025, 8:26:22 AM","Demo day submission",0.0028000000000000004,0.0004,0
-"5/16/2025, 8:26:22 AM","Startup CSS",0.0088,0.002,"0.83"
-"5/16/2025, 8:26:22 AM","Startup HTML",0.0091,0.0023,"0.85"
-"5/16/2025, 8:26:22 AM","Startup DB",0.0076,0.0039000000000000003,"0.69"
-"5/16/2025, 8:26:22 AM","Startup React Phase 1: HTML/CSS",0.0083,0.0024,"0.79"
-"5/16/2025, 8:26:22 AM","Startup Service",0.008100000000000001,0.0042,"0.73"
-"5/16/2025, 8:26:22 AM","Startup WebSocket",0.0069,0.0025,"0.61"
-"5/16/2025, 8:26:22 AM","Startup specification",0.009399999999999999,0.001,"0.92"
-"5/16/2025, 8:26:22 AM","Startup React Phase 2: Interactivity",0.008199999999999999,0.0027,"0.76"
-"5/16/2025, 8:26:22 AM","Startup AWS",0.009300000000000001,0.0011,"0.91"
-"5/16/2025, 8:26:22 AM","Student Rating Submission",0.01,0,0
-"5/16/2025, 8:27:37 AM","Demo day submission",0.0028000000000000004,0.0004,0
-"5/16/2025, 8:27:37 AM","Startup CSS",0.0088,0.002,"0.83"
-"5/16/2025, 8:27:37 AM","Startup HTML",0.0091,0.0023,"0.85"
-"5/16/2025, 8:27:37 AM","Startup DB",0.0076,0.0039000000000000003,"0.69"
-"5/16/2025, 8:27:37 AM","Startup React Phase 1: HTML/CSS",0.0083,0.0024,"0.79"
-"5/16/2025, 8:27:37 AM","Startup Service",0.008100000000000001,0.0042,"0.73"
-"5/16/2025, 8:27:37 AM","Startup WebSocket",0.0069,0.0025,"0.61"
-"5/16/2025, 8:27:37 AM","Startup specification",0.009399999999999999,0.001,"0.92"
-"5/16/2025, 8:27:37 AM","Startup React Phase 2: Interactivity",0.008199999999999999,0.0027,"0.76"
-"5/16/2025, 8:27:37 AM","Startup AWS",0.009300000000000001,0.0011,"0.91"
-"5/16/2025, 8:27:37 AM","Student Rating Submission",0.01,0,0
-"5/16/2025, 8:30:49 AM","Demo day submission","0.28","0.04",0
-"5/16/2025, 8:30:49 AM","Startup CSS","0.88","0.20","0.83"
-"5/16/2025, 8:30:49 AM","Startup HTML","0.91","0.23","0.85"
-"5/16/2025, 8:30:49 AM","Startup DB","0.76","0.39","0.69"
-"5/16/2025, 8:30:49 AM","Startup React Phase 1: HTML/CSS","0.83","0.24","0.79"
-"5/16/2025, 8:30:49 AM","Startup Service","0.81","0.42","0.73"
-"5/16/2025, 8:30:49 AM","Startup WebSocket","0.69","0.25","0.61"
-"5/16/2025, 8:30:49 AM","Startup specification","0.94","0.10","0.92"
-"5/16/2025, 8:30:49 AM","Startup React Phase 2: Interactivity","0.82","0.27","0.76"
-"5/16/2025, 8:30:49 AM","Startup AWS","0.93","0.11","0.91"
-"5/16/2025, 8:30:49 AM","Student Rating Submission","1.00","0.00",0
 "5/16/2025, 8:39:11 AM","Demo day submission",0.28,0.04,0
 "5/16/2025, 8:39:11 AM","Startup CSS",0.88,0.2,0.83
 "5/16/2025, 8:39:11 AM","Startup HTML",0.91,0.23,0.85
@@ -109,3 +10,14 @@
 "5/16/2025, 8:39:11 AM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
 "5/16/2025, 8:39:11 AM","Startup AWS",0.93,0.11,0.91
 "5/16/2025, 8:39:11 AM","Student Rating Submission",1,0,0
+"9/4/2025, 12:11:18 PM","Demo day submission",0.28,0.04,0
+"9/4/2025, 12:11:18 PM","Startup CSS",0.88,0.2,0.83
+"9/4/2025, 12:11:18 PM","Startup HTML",0.91,0.23,0.85
+"9/4/2025, 12:11:18 PM","Startup DB",0.76,0.39,0.69
+"9/4/2025, 12:11:18 PM","Startup React Phase 1: HTML/CSS",0.83,0.24,0.79
+"9/4/2025, 12:11:18 PM","Startup Service",0.81,0.42,0.73
+"9/4/2025, 12:11:18 PM","Startup WebSocket",0.69,0.25,0.61
+"9/4/2025, 12:11:18 PM","Startup specification",0.94,0.1,0.92
+"9/4/2025, 12:11:18 PM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
+"9/4/2025, 12:11:18 PM","Startup AWS",0.93,0.11,0.91
+"9/4/2025, 12:11:18 PM","Student Rating Submission",1,0,0

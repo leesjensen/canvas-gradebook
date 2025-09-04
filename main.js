@@ -119,9 +119,11 @@ function getNextUrl(response) {
   return match ? match[1] : null;
 }
 
-processSubmissions();
-
-// const period = 24 * 60 * 60 * 1000;
-// setInterval(() => {
-//   processSubmissions();
-// }, period);
+if (process.argv.includes('--repeat')) {
+  const period = 24 * 60 * 60 * 1000;
+  setInterval(() => {
+    processSubmissions();
+  }, period);
+} else {
+  processSubmissions();
+}
