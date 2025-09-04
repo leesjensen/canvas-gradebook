@@ -26,7 +26,7 @@ Get a Canvas API Access Token.
 
 Create a `config.js` file in the root of the project. Replace the values given below with your Canvas URL, course, and API Access Token.
 
-```json
+```js
 export default {
   canvas: {
     url: 'https://canvas.instructure.com/api/v1',
