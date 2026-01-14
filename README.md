@@ -57,12 +57,14 @@ Run `node main.js`. This will produce a CVS file containing a summary of submiss
 
 ```
 
+Use `--repeat` to cause it to repeat every 24 hours.
+
 ### Deployment
 
 Use PM2 to cause the program to run once a day.
 
 ```sh
-pm2 start main.js -n cs260Gradebook --cron "0 0 * * *" --watch
+pm2 start main.js -n cs260Gradebook --watch -- --repeat
 ```
 
 Deploy with:

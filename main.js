@@ -129,3 +129,9 @@ function getNextUrl(response) {
 }
 
 processSubmissions();
+if (process.argv.includes('--repeat')) {
+  const period = 24 * 60 * 60 * 1000;
+  setInterval(() => {
+    processSubmissions();
+  }, period);
+}
