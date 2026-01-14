@@ -41,35 +41,34 @@ export default {
 Run `node main.js`. This will produce a CVS file containing a summary of submission information for the current grade book. Each time you run it, it will add the latest submission summary for each assignment.
 
 ```csv
-"date","assignment","submissionPercent","latePercent","averageGrade"
-"5/16/2025, 8:39:11 AM","Demo day submission",0.28,0.04,0
-"5/16/2025, 8:39:11 AM","Startup CSS",0.88,0.2,0.83
-"5/16/2025, 8:39:11 AM","Startup HTML",0.91,0.23,0.85
-"5/16/2025, 8:39:11 AM","Startup DB",0.76,0.39,0.69
-"5/16/2025, 8:39:11 AM","Startup React Phase 1: HTML/CSS",0.83,0.24,0.79
-"5/16/2025, 8:39:11 AM","Startup Service",0.81,0.42,0.73
-"5/16/2025, 8:39:11 AM","Startup WebSocket",0.69,0.25,0.61
-"5/16/2025, 8:39:11 AM","Startup specification",0.94,0.1,0.92
-"5/16/2025, 8:39:11 AM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
-"5/16/2025, 8:39:11 AM","Startup AWS",0.93,0.11,0.91
-"5/16/2025, 8:39:11 AM","Student Rating Submission",1,0,0
-"9/4/2025, 12:11:18 PM","Demo day submission",0.28,0.04,0
-"9/4/2025, 12:11:18 PM","Startup CSS",0.88,0.2,0.83
-"9/4/2025, 12:11:18 PM","Startup HTML",0.91,0.23,0.85
-"9/4/2025, 12:11:18 PM","Startup DB",0.76,0.39,0.69
-"9/4/2025, 12:11:18 PM","Startup React Phase 1: HTML/CSS",0.83,0.24,0.79
-"9/4/2025, 12:11:18 PM","Startup Service",0.81,0.42,0.73
-"9/4/2025, 12:11:18 PM","Startup WebSocket",0.69,0.25,0.61
-"9/4/2025, 12:11:18 PM","Startup specification",0.94,0.1,0.92
-"9/4/2025, 12:11:18 PM","Startup React Phase 2: Interactivity",0.82,0.27,0.76
-"9/4/2025, 12:11:18 PM","Startup AWS",0.93,0.11,0.91
-"9/4/2025, 12:11:18 PM","Student Rating Submission",1,0,0
+"date","assignment","userCount","submissionPercent","latePercent","averageGrade"
+"1/14/2026, 4:07:06 PM","Demo day submission",158,0,0,0
+"1/14/2026, 4:07:06 PM","Startup AWS",158,0.04,0,1
+"1/14/2026, 4:07:06 PM","Startup CSS",158,0,0,0
+"1/14/2026, 4:07:06 PM","Startup DB",158,0,0,0
+"1/14/2026, 4:07:06 PM","Startup HTML",158,0.01,0,0.95
+"1/14/2026, 4:07:06 PM","Startup React Phase 1: React Routing",158,0,0,0
+"1/14/2026, 4:07:06 PM","Startup React Phase 2: Reactivity",158,0,0,0
+"1/14/2026, 4:07:06 PM","Startup Service",158,0,0,0
+"1/14/2026, 4:07:06 PM","Startup WebSocket",158,0,0,0
+"1/14/2026, 4:07:06 PM","Startup specification",158,0.63,0,0.98
+"1/14/2026, 4:07:06 PM","Student Rating Survey",158,0,0,0
+"1/14/2026, 4:07:06 PM","Grace days",158,0,0,0
+
 ```
 
-If you want to have the report run once a day then include the `repeat` parameter.
+### Deployment
+
+Use PM2 to cause the program to run once a day.
 
 ```sh
-node main.js --repeat
+pm2 start main.js -n cs260Gradebook --cron "0 0 * * *" --watch
+```
+
+Deploy with:
+
+```
+./deploy.sh -k <keyfile> -h <host>
 ```
 
 ### Analyze
