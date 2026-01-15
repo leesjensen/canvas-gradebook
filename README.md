@@ -42,19 +42,18 @@ Run `node main.js`. This will produce a CVS file containing a summary of submiss
 
 ```csv
 "date","assignment","userCount","submissionPercent","latePercent","averageGrade"
-"1/14/2026, 4:07:06 PM","Demo day submission",158,0,0,0
-"1/14/2026, 4:07:06 PM","Startup AWS",158,0.04,0,1
-"1/14/2026, 4:07:06 PM","Startup CSS",158,0,0,0
-"1/14/2026, 4:07:06 PM","Startup DB",158,0,0,0
-"1/14/2026, 4:07:06 PM","Startup HTML",158,0.01,0,0.95
-"1/14/2026, 4:07:06 PM","Startup React Phase 1: React Routing",158,0,0,0
-"1/14/2026, 4:07:06 PM","Startup React Phase 2: Reactivity",158,0,0,0
-"1/14/2026, 4:07:06 PM","Startup Service",158,0,0,0
-"1/14/2026, 4:07:06 PM","Startup WebSocket",158,0,0,0
-"1/14/2026, 4:07:06 PM","Startup specification",158,0.63,0,0.98
-"1/14/2026, 4:07:06 PM","Student Rating Survey",158,0,0,0
-"1/14/2026, 4:07:06 PM","Grace days",158,0,0,0
-
+"1/15/2026, 6:17:08 PM","Demo day submission",155,0,0,0
+"1/15/2026, 6:17:08 PM","Startup AWS",155,0.08,0,1
+"1/15/2026, 6:17:08 PM","Startup CSS",155,0,0,0
+"1/15/2026, 6:17:08 PM","Startup DB",155,0,0,0
+"1/15/2026, 6:17:08 PM","Startup HTML",155,0.01,0,0.95
+"1/15/2026, 6:17:08 PM","Startup React Phase 1: React Routing",155,0,0,0
+"1/15/2026, 6:17:08 PM","Startup React Phase 2: Reactivity",155,0,0,0
+"1/15/2026, 6:17:08 PM","Startup Service",155,0,0,0
+"1/15/2026, 6:17:08 PM","Startup WebSocket",155,0,0,0
+"1/15/2026, 6:17:08 PM","Startup specification",155,0.72,0,0.98
+"1/15/2026, 6:17:08 PM","Student Rating Survey",155,0,0,0
+"1/15/2026, 6:17:08 PM","Grace days",155,0,0,0
 ```
 
 Use `--repeat` to cause it to repeat every 24 hours.
@@ -72,6 +71,20 @@ Deploy with:
 ```
 ./deploy.sh -k <keyfile> -h <host>
 ```
+
+Running under pm2 is problematic because it restarts the app unexpectedly.
+
+Instead use a cron job.
+
+```
+crontab -e
+```
+
+```
+@daily cd /home/ubuntu/services/canvas-gradebook && /home/ubuntu/.nvm/versions/node/v22.13.0/bin/node main.js
+```
+
+This will run it every night at midnight.
 
 ### Analyze
 
