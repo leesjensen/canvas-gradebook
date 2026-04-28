@@ -1,137 +1,250 @@
-const { AsyncParser } = require('@json2csv/node');
-const config = require('./config');
+const dayjs = require('dayjs');
 const fs = require('fs');
+const path = require('path');
 
-async function loadUsers(assignments) {
-  const url = `${config.canvas.url}/courses/${config.canvas.course}/users?enrollment_type=student&enrollment_state[]=active&enrollment_state[]=inactive&include[]=enrollments&per_page=100`;
-  const users = {};
-  await callCanvas(url, (user) => {
-    users[user.id] = {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      assignmentCount: 0,
-      assignments: Object.fromEntries(Object.entries(assignments).map(([key, value]) => [key, { id: key, done: 0, attempt: 0 }])),
-    };
-  });
+// ---- CONFIG ----
+const CONFIG_PATH = process.argv[2] || 'config.json';
 
-  return users;
-}
+function loadConfig() {
+  const config = require(`./${CONFIG_PATH}`);
 
-async function loadAssignments() {
-  const url = `${config.canvas.url}/courses/${config.canvas.course}/assignments?per_page=100`;
-  const assignments = {};
-  await callCanvas(url, (assignment) => {
-    assignments[assignment.id] = {
-      id: assignment.id,
-      possiblePoints: assignment.points_possible,
-      name: assignment.name,
-      submissionCount: 0,
-      lateCount: 0,
-      totalStudentPoints: 0,
-    };
-  });
-
-  return assignments;
-}
-
-async function processSubmissions() {
-  const assignments = await loadAssignments();
-  const users = await loadUsers(assignments);
-
-  if (Object.keys(assignments).length === 0 || Object.keys(users).length === 0) return;
-
-  try {
-    let url = `${config.canvas.url}/courses/${config.canvas.course}/students/submissions?workflow_state=graded&student_ids[]=all&per_page=50`;
-    await callCanvas(url, (e) => {
-      const user = users[e.user_id];
-      if (user) {
-        if (user.assignments[e.assignment_id].attempt < e.attempt) {
-          user.assignments[e.assignment_id] = { id: e.assignment_id, attempt: e.attempt, done: e.missing ? 0 : 1, late: e.late, score: e.score };
-        }
-      }
-    });
-
-    const results = collateResults(users, assignments);
-    writeResults(results);
-    console.log(`Processed ${config.canvas.course}, ${Object.keys(users).length} users and ${Object.keys(assignments).length} assignments.`);
-  } catch (error) {
-    console.error('Error fetching gradebook:', error.message);
+  if (!config.courseUrl || !config.startDate || !config.endDate || !config.apiKey) {
+    console.error('Config must include: courseUrl, startDate, endDate, apiKey');
+    process.exit(1);
   }
+
+  return config;
 }
 
-function formatNum(condition, value) {
-  return condition ? parseFloat(value.toFixed(2)) : 0;
-}
+// ---- FETCH HELPERS ----
+async function fetchAllPages(url, apiKey) {
+  let results = [];
+  let nextUrl = url;
 
-function collateResults(users, assignments) {
-  const userCount = Object.keys(users).length;
-  const dateHeader = new Date().toLocaleString();
-  return Object.values(assignments).map((assignment) => {
-    Object.values(users).forEach((user) => {
-      const userAssignment = user.assignments[assignment.id];
-      if (userAssignment && userAssignment.done) {
-        assignment.submissionCount += 1;
-        assignment.lateCount += userAssignment.late ? 1 : 0;
-        assignment.totalStudentPoints += userAssignment.score || 0;
-      }
-    }, 0);
-
-    const averageGrade = formatNum(assignment.possiblePoints && assignment.submissionCount, assignment.totalStudentPoints / assignment.submissionCount / assignment.possiblePoints);
-    const submissionPercent = formatNum(userCount, assignment.submissionCount / userCount);
-    const latePercent = formatNum(userCount, assignment.lateCount / userCount);
-    return {
-      date: dateHeader,
-      assignment: assignment.name,
-      userCount: userCount,
-      submissionPercent: submissionPercent,
-      latePercent: latePercent,
-      averageGrade: averageGrade,
-    };
-  });
-}
-
-async function writeResults(results) {
-  const filename = `gradebook-${config.canvas.course}.csv`;
-  const fileExists = fs.existsSync(filename);
-  const parser = new AsyncParser({ header: !fileExists }, {}, {});
-  const csv = await parser.parse(results).promise();
-  fs.appendFileSync(filename, csv + '\n', 'utf8');
-}
-
-async function callCanvas(url, processCallback) {
-  console.log(`\n-----------------------\nStarting fetch from URL: ${url}`);
-  while (url) {
-    const response = await fetch(url, {
+  while (nextUrl) {
+    const res = await fetch(nextUrl, {
       headers: {
-        Authorization: `Bearer ${config.canvas.token}`,
+        Authorization: `Bearer ${apiKey}`,
+        Accept: 'application/json',
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+    const text = await res.text();
+    const data = JSON.parse(text);
+
+    results = results.concat(data);
+
+    const link = res.headers.get('link');
+    nextUrl = null;
+
+    if (link) {
+      const match = link.match(/<([^>]+)>;\s*rel="next"/);
+      if (match) nextUrl = match[1];
+    }
+  }
+
+  return results;
+}
+
+// ---- API ----
+async function getAssignments(config) {
+  const url = `${config.courseUrl}/assignments?per_page=100`;
+  return fetchAllPages(url, config.apiKey);
+}
+
+async function getEnrollments(config) {
+  const url = `${config.courseUrl}/enrollments?type[]=StudentEnrollment&per_page=100`;
+  return fetchAllPages(url, config.apiKey);
+}
+
+async function getAllSubmissions(config) {
+  const url = `${config.courseUrl}/students/submissions?student_ids[]=all&per_page=100&include[]=submission_history`;
+  return fetchAllPages(url, config.apiKey);
+}
+
+// ---- BUILD DATA ----
+function buildAssignmentData(submissions, assignments) {
+  const assignmentMap = {};
+
+  assignments.forEach((a) => {
+    assignmentMap[String(a.id)] = {
+      id: a.id,
+      name: a.name,
+      submissions: {},
+    };
+  });
+
+  submissions.forEach((sub) => {
+    const assignment = assignmentMap[String(sub.assignment_id)];
+    if (!assignment) return;
+
+    let latest = null;
+
+    if (sub.submission_history) {
+      sub.submission_history.forEach((attempt) => {
+        if (attempt.submitted_at) {
+          const d = dayjs(attempt.submitted_at);
+          if (!latest || d.isAfter(latest)) latest = d;
+        }
+      });
     }
 
-    const data = await response.json();
-    data.forEach(processCallback);
+    if (sub.submitted_at) {
+      const d = dayjs(sub.submitted_at);
+      if (!latest || d.isAfter(latest)) latest = d;
+    }
 
-    url = getNextUrl(response);
-    console.log(`Fetched ${data.length} records, next URL: ${url}`);
+    if (latest) {
+      assignment.submissions[sub.user_id] = latest;
+    }
+  });
+
+  return Object.values(assignmentMap);
+}
+
+// ---- DATE RANGE ----
+function generateDates(start, end) {
+  const dates = [];
+  let current = dayjs(start);
+  const last = dayjs(end);
+
+  while (current.isBefore(last) || current.isSame(last)) {
+    dates.push(current);
+    current = current.add(1, 'day');
   }
+
+  return dates;
 }
 
-function getNextUrl(response) {
-  const header = response.headers.get('link');
-  if (!header) return null;
+// ---- TABLE ----
+function computeTable(assignmentsData, studentIds, dates) {
+  return dates.map((date) => {
+    const row = {
+      date: date.format('MMM/DD/YYYY'),
+    };
 
-  const match = header.match(/<([^>]+)>;\s*rel="next"/);
-  return match ? match[1] : null;
+    assignmentsData.forEach((a) => {
+      const submitted = studentIds.filter((id) => {
+        const d = a.submissions[id];
+        if (!d) return false;
+        return d.isBefore(date) || d.isSame(date);
+      }).length;
+
+      row[a.name] = Math.round((submitted / studentIds.length) * 100);
+    });
+
+    return row;
+  });
 }
 
-processSubmissions();
-if (process.argv.includes('--repeat')) {
-  const period = 24 * 60 * 60 * 1000;
-  setInterval(() => {
-    processSubmissions();
-  }, period);
+// ---- CSV OUTPUT ----
+function csvEscape(value) {
+  if (value === null || value === undefined) return '';
+  return `"${String(value).replace(/"/g, '""')}"`;
 }
+
+function writeCsv(config, table, assignments) {
+  const courseIdMatch = config.courseUrl.match(/courses\/(\d+)/);
+  const courseId = courseIdMatch ? courseIdMatch[1] : 'course';
+
+  const safeStart = dayjs(config.startDate).format('YYYY-MM-DD');
+  const safeEnd = dayjs(config.endDate).format('YYYY-MM-DD');
+
+  const fileName = `${courseId}-${safeStart}-${safeEnd}.csv`;
+  const filePath = path.resolve(fileName);
+
+  const headers = ['Date', ...assignments.map((a) => a.name)];
+  const lines = [headers.map(csvEscape).join(', ')];
+
+  table.forEach((row) => {
+    const values = [csvEscape(row.date), ...assignments.map((a) => row[a.name] ?? 0)];
+    lines.push(values.join(', '));
+  });
+
+  fs.writeFileSync(filePath, lines.join('\n'));
+
+  console.log(`CSV written to ${filePath}`);
+}
+
+// ---- SUMMARY ----
+function printSummaryStats(active, inactive, assignmentsData) {
+  const total = active.length + inactive.length;
+
+  const hasAny = (id) => assignmentsData.some((a) => a.submissions[id]);
+  const hasAll = (id) => assignmentsData.every((a) => a.submissions[id]);
+
+  const activeStats = {
+    any: active.filter(hasAny).length,
+    all: active.filter(hasAll).length,
+    none: active.filter((id) => !hasAny(id)).length,
+  };
+
+  const inactiveStats = {
+    started: inactive.filter(hasAny).length,
+    none: inactive.filter((id) => !hasAny(id)).length,
+  };
+
+  const pct = (n, d) => (d === 0 ? 0 : Math.round((n / d) * 100));
+
+  console.log('\n===== Course Summary =====');
+  console.log(`Total students: ${total}`);
+  console.log(`Active: ${active.length}`);
+  console.log(`Inactive: ${inactive.length}`);
+
+  console.log('\n--- Active ---');
+  console.log(`Started: ${pct(activeStats.any, active.length)}%`);
+  console.log(`Completed all: ${pct(activeStats.all, active.length)}%`);
+  console.log(`Never started: ${pct(activeStats.none, active.length)}%`);
+
+  console.log('\n--- Inactive ---');
+  console.log(`Dropped after starting: ${pct(inactiveStats.started, inactive.length)}%`);
+  console.log(`Dropped without starting: ${pct(inactiveStats.none, inactive.length)}%`);
+}
+
+// ---- MAIN ----
+async function main() {
+  const config = loadConfig();
+
+  console.log('Fetching assignments...');
+  const assignments = await getAssignments(config);
+  console.log(`Assignments fetched: ${assignments.length}`);
+
+  const filteredAssignments = config.includeAssignments?.length ? assignments.filter((a) => config.includeAssignments.includes(a.name)) : assignments;
+
+  console.log('Fetching enrollments...');
+  const enrollments = await getEnrollments(config);
+
+  const active = enrollments.filter((e) => e.enrollment_state === 'active').map((e) => e.user_id);
+
+  const inactive = enrollments.filter((e) => e.enrollment_state !== 'active').map((e) => e.user_id);
+
+  console.log('Fetching ALL submissions...');
+  const submissions = await getAllSubmissions(config);
+
+  console.log(`Fetched ${submissions.length} submissions`);
+
+  const uniqueUsers = new Set(submissions.map((s) => s.user_id));
+  const uniqueAssignments = new Set(submissions.map((s) => s.assignment_id));
+
+  console.log(`Unique users in submissions: ${uniqueUsers.size}`);
+  console.log(`Unique assignments in submissions: ${uniqueAssignments.size}`);
+
+  const assignmentsData = buildAssignmentData(submissions, assignments);
+
+  const filteredData = assignmentsData.filter((a) => filteredAssignments.some((f) => f.id === a.id));
+
+  const dates = generateDates(config.startDate, config.endDate);
+
+  const allStudents = [...new Set([...active, ...inactive])];
+  const table = computeTable(filteredData, allStudents, dates);
+
+  // ✅ CSV output restored
+  writeCsv(config, table, filteredData);
+
+  printSummaryStats(active, inactive, filteredData);
+}
+
+main().catch((err) => {
+  console.error('Fatal error:', err);
+  process.exit(1);
+});

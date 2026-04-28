@@ -1,6 +1,6 @@
 # canvas-gradebook
 
-Grabs the canvas gradebook once a day and computes statistics
+Grabs the canvas gradebook and generates submission statistics.
 
 ## Installation
 
@@ -24,16 +24,18 @@ Get a Canvas API Access Token.
 
 ### Config.js
 
-Create a `config.js` file in the root of the project. Replace the values given below with your Canvas URL, course, and API Access Token.
+Create a `config.json` file in the root of the project. Replace the values given below with your Canvas URL, course, and API Access Token.
 
 ```js
-export default {
-  canvas: {
-    url: 'https://canvas.instructure.com/api/v1',
-    course: '99999',
-    token: 'xyz',
-  },
-};
+{
+  "courseUrl": "https://byu.instructure.com/api/v1/courses/555",
+  "startDate": "2026-01-01",
+  "endDate": "2026-04-25",
+  "apiKey": "tokenhere",
+
+  "includeAssignments": ["Startup specification", "Startup AWS", "Startup HTML", "Startup CSS", "Startup React Phase 1: React Routing", "Startup React Phase 2: Reactivity", "Startup Service", "Startup DB", "Startup WebSocket"]
+}
+
 ```
 
 ### Execute
@@ -41,50 +43,17 @@ export default {
 Run `node main.js`. This will produce a CVS file containing a summary of submission information for the current grade book. Each time you run it, it will add the latest submission summary for each assignment.
 
 ```csv
-"date","assignment","userCount","submissionPercent","latePercent","averageGrade"
-"1/15/2026, 6:17:08 PM","Demo day submission",155,0,0,0
-"1/15/2026, 6:17:08 PM","Startup AWS",155,0.08,0,1
-"1/15/2026, 6:17:08 PM","Startup CSS",155,0,0,0
-"1/15/2026, 6:17:08 PM","Startup DB",155,0,0,0
-"1/15/2026, 6:17:08 PM","Startup HTML",155,0.01,0,0.95
-"1/15/2026, 6:17:08 PM","Startup React Phase 1: React Routing",155,0,0,0
-"1/15/2026, 6:17:08 PM","Startup React Phase 2: Reactivity",155,0,0,0
-"1/15/2026, 6:17:08 PM","Startup Service",155,0,0,0
-"1/15/2026, 6:17:08 PM","Startup WebSocket",155,0,0,0
-"1/15/2026, 6:17:08 PM","Startup specification",155,0.72,0,0.98
-"1/15/2026, 6:17:08 PM","Student Rating Survey",155,0,0,0
-"1/15/2026, 6:17:08 PM","Grace days",155,0,0,0
+"Date", "Startup AWS", "Startup CSS", "Startup DB", "Startup HTML", "Startup React Phase 1: React Routing", "Startup React Phase 2: Reactivity", "Startup Service", "Startup WebSocket", "Startup specification"
+"Jan/01/2026", 0, 0, 0, 0, 0, 0, 0, 0, 0
+"Jan/02/2026", 0, 0, 0, 0, 0, 0, 0, 0, 0
+"Jan/03/2026", 0, 0, 0, 0, 0, 0, 0, 0, 0
+"Jan/04/2026", 0, 0, 0, 0, 0, 0, 0, 0, 0
+"Jan/05/2026", 0, 0, 0, 0, 0, 0, 0, 0, 0
+"Jan/06/2026", 0, 0, 0, 0, 0, 0, 0, 0, 0
+"Jan/07/2026", 0, 0, 0, 0, 0, 0, 0, 0, 1
+"Jan/08/2026", 1, 0, 0, 0, 0, 0, 0, 0, 2
+"Jan/09/2026", 1, 0, 0, 0, 0, 0, 0, 0, 7
 ```
-
-Use `--repeat` to cause it to repeat every 24 hours.
-
-### Deployment
-
-Use PM2 to cause the program to run once a day.
-
-```sh
-pm2 start main.js -n cs260Gradebook --watch -- --repeat
-```
-
-Deploy with:
-
-```
-./deploy.sh -k <keyfile> -h <host>
-```
-
-Running under pm2 is problematic because it restarts the app unexpectedly.
-
-Instead use a cron job.
-
-```
-crontab -e
-```
-
-```
-@daily cd /home/ubuntu/services/canvas-gradebook && /home/ubuntu/.nvm/versions/node/v22.13.0/bin/node main.js
-```
-
-This will run it every night at midnight.
 
 ### Analyze
 
