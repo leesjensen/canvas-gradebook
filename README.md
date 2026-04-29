@@ -59,4 +59,3 @@ Run `node main.js`. This will produce a CVS file containing a summary of submiss
 
 Open the CSV in your favorite editor and enjoy.
 
-![alt text](spreadsheet.png)
