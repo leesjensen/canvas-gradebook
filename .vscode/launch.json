@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/index.js",
+      "program": "${workspaceFolder}/main.js",
       "args": ["config.json", "grades.csv"]
     }
   ]

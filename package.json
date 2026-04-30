@@ -18,7 +18,8 @@
   },
   "homepage": "https://github.com/leesjensen/canvas-gradebook#readme",
   "dependencies": {
-    "@json2csv/node": "^7.0.6",
-    "fs": "^0.0.1-security"
+    "dayjs": "^1.11.20",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
   }
 }
